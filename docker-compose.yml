@@ -1,0 +1,108 @@
+version: "3"
+services:
+  influxdb-meta01:
+    image: influxdb-meta:latest
+    container_name: influxdb-meta01
+    hostname: influxdb-meta01
+    ports:
+      - "18091:8091"
+    environment:
+      - "LICENSE_KEY=75969169-c1b6-4db7-aa4b-9e24492c0a80"
+      - "hostname=influxdb-meta01"
+    volumes:
+      - /Users/dmitry/influxdata-docker/meta01.conf:/etc/influxdb/influxdb-meta.conf
+      - /Users/dmitry/influx-meta01:/var/lib/influxdb
+
+  influxdb-meta02:
+    image: influxdb-meta:latest
+    container_name: influxdb-meta02
+    hostname: influxdb-meta02
+    ports:
+      - "28091:8091"
+    environment:
+      - "LICENSE_KEY=75969169-c1b6-4db7-aa4b-9e24492c0a80"
+      - "hostname=influxdb-meta02"
+    volumes:
+      - /Users/dmitry/influxdata-docker/meta02.conf:/etc/influxdb/influxdb-meta.conf
+      - /Users/dmitry/influx-meta02:/var/lib/influxdb
+
+  influxdb-meta03:
+    image: influxdb-meta:latest
+    container_name: influxdb-meta03
+    hostname: influxdb-meta03
+    ports:
+      - "38091:8091"
+    environment:
+      - "LICENSE_KEY=75969169-c1b6-4db7-aa4b-9e24492c0a80"
+      - "hostname=influxdb-meta03"
+    volumes:
+      - /Users/dmitry/influxdata-docker/meta03.conf:/etc/influxdb/influxdb-meta.conf
+      - /Users/dmitry/influx-meta03:/var/lib/influxdb
+
+  influxdb-data01:
+    image: influxdb-data:latest
+    container_name: influxdb-data01
+    hostname: influxdb-data01
+    ports:
+      - "8086:8086"
+    environment:
+      - "LICENSE_KEY=75969169-c1b6-4db7-aa4b-9e24492c0a80"
+      - "hostname=influxdb-data01"
+    volumes:
+      - /Users/dmitry/influxdata-docker/data01.conf:/etc/influxdb/influxdb.conf
+      - /Users/dmitry/influx-data:/var/lib/influxdb
+
+  influxdb-data02:
+    image: influxdb-data:latest
+    container_name: influxdb-data02
+    hostname: influxdb-data02
+    ports:
+      - "28086:8086"
+    environment:
+      - "LICENSE_KEY=75969169-c1b6-4db7-aa4b-9e24492c0a80"
+      - "hostname=influxdb-data02"
+    volumes:
+      - /Users/dmitry/influxdata-docker/data02.conf:/etc/influxdb/influxdb.conf
+      - /Users/dmitry/influx-data02:/var/lib/influxdb
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    hostname: telegraf
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:rw
+
+  chronograf:
+    image: chronograf:latest
+    container_name: chronograf
+    hostname: chronograf
+    ports:
+      - "8888:8888"
+  kapacitor:
+    image: kapacitor:latest
+    container_name: kapacitor
+    hostname: kapacitor
+    environment:
+      - "KAPACITOR_INFLUXDB_0_URLS_0=http://influxdb-data01:8086,http://influxdb-data02:8086"
+    volumes:
+      - ./kapacitor.conf:/etc/kapacitor/kapacitor.conf:rw
+    ports:
+      - "9092:9092"
+  haproxy:
+    image: haproxy
+    container_name: haproxy
+    hostname: haproxy
+    ports:
+      - "18086:8086"
+    volumes:
+      - /Users/dmitry/influxdata-docker/haproxy:/usr/local/etc/haproxy:ro
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - 'GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource'
+    
+networks:
+  default:
